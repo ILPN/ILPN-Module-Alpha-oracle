@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
 import {
     AlphaOracleService, DropFile, FD_LOG, FD_PETRI_NET,
-    IncrementingCounter, PetriNetSerialisationService, XesLogParserService
+    IncrementingCounter, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 
@@ -39,12 +39,31 @@ export class AppComponent {
         this.result = undefined;
         this.processing = true;
         const log = this._xesParser.parse(files[0].content);
-        this._alphaOracle.determineConcurrency(log).subscribe(pos => {
+
+        const relabeler = new Relabeler();
+        if (this.fcDistinguishSameEvents.value) {
+            this.relabelLog(log, relabeler);
+        }
+
+        this._alphaOracle.determineConcurrency(log, {
+            addStartStopEvent: this.fcAddStartStopEvent.value,
+            mergePrefixes: this.fcMergeSamePrefix.value,
+            lookAheadDistance: this.fcParallelismDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcParallelismDistance.value)
+        }).subscribe(pos => {
             const counter = new IncrementingCounter();
             this.result = pos.map(pn => {
                 return new DropFile(`po${counter.next()}`, this._PetriNetSerializer.serialise(pn));
             });
         });
+    }
+
+    private relabelLog(log: Array<Trace>, relabeler: Relabeler) {
+        for (const t of log) {
+            for (const e of t.events) {
+                e.name = relabeler.getNewLabel(e.name);
+            }
+            relabeler.restartSequence();
+        }
     }
 
 }
