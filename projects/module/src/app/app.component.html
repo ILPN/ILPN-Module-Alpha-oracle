@@ -3,7 +3,7 @@
     <hr>
 
     <div fxLayout="row wrap" fxLayoutAlign="space-evenly start">
-        <ilpn-file-upload [fileDisplay]="FD_LOG" descriptionText="Drop a .XES log file here"></ilpn-file-upload>
+        <ilpn-file-upload [fileDisplay]="FD_LOG" [showText]="result === undefined && !processing" (fileContent)="processFileUpload($event)" descriptionText="Drop a .XES log file here"></ilpn-file-upload>
 
         <div fxLayout="column" fxLayoutAlign="center start" class="sliders">
             <mat-form-field appearance="fill">
@@ -19,7 +19,7 @@
             <mat-slide-toggle [formControl]="fcAddStartStopEvent" fxFlexAlign="center" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
         </div>
 
-        <ilpn-file-download [fileDisplay]="FD_PN" descriptionText="Click to download partial orders"></ilpn-file-download>
+        <ilpn-file-download [fileDisplay]="FD_PN" [disabled]="result === undefined" descriptionText="Click to download partial orders"></ilpn-file-download>
     </div>
 
 </ilpn-page-layout>
