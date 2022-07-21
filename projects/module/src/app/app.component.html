@@ -19,7 +19,7 @@
             <mat-slide-toggle [formControl]="fcAddStartStopEvent" fxFlexAlign="center" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
         </div>
 
-        <ilpn-file-download [fileDisplay]="FD_PN" [disabled]="result === undefined" descriptionText="Click to download partial orders"></ilpn-file-download>
+        <ilpn-file-download [fileDisplay]="FD_PN" [disabled]="result === undefined" [files]="result" [dontZip]="true" descriptionText="Click to download partial orders"></ilpn-file-download>
     </div>
 
 </ilpn-page-layout>
