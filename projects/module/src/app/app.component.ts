@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
 import {
     AlphaOracleService, DropFile, FD_LOG, FD_PETRI_NET,
-    IncrementingCounter, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
+    IncrementingCounter, PetriNet, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 
@@ -52,6 +52,7 @@ export class AppComponent {
         }).subscribe(pos => {
             const counter = new IncrementingCounter();
             this.result = pos.map(pn => {
+                this.relabelNet(pn, relabeler.getLabelMapping());
                 return new DropFile(`po${counter.next()}`, this._PetriNetSerializer.serialise(pn));
             });
         });
@@ -63,6 +64,12 @@ export class AppComponent {
                 e.name = relabeler.getNewLabel(e.name);
             }
             relabeler.restartSequence();
+        }
+    }
+
+    private relabelNet(net: PetriNet, labelMapping: Map<string, string>) {
+        for (const t of net.getTransitions()) {
+            t.label = labelMapping.get(t.label!);
         }
     }
 
