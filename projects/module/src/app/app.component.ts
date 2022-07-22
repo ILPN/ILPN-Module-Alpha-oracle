@@ -47,7 +47,7 @@ export class AppComponent {
 
         this._alphaOracle.determineConcurrency(log, {
             addStartStopEvent: this.fcAddStartStopEvent.value,
-            mergePrefixes: this.fcMergeSamePrefix.value,
+            discardPrefixes: this.fcMergeSamePrefix.value,
             lookAheadDistance: this.fcParallelismDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcParallelismDistance.value)
         }).subscribe(pos => {
             const counter = new IncrementingCounter();
