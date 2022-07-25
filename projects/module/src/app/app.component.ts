@@ -63,6 +63,9 @@ export class AppComponent {
     private relabelLog(log: Array<Trace>, relabeler: Relabeler) {
         for (const t of log) {
             for (const e of t.events) {
+                if (e.name === AlphaOracleService.START_SYMBOL || e.name === AlphaOracleService.STOP_SYMBOL) {
+                    continue;
+                }
                 e.name = relabeler.getNewLabel(e.name);
             }
             relabeler.restartSequence();
