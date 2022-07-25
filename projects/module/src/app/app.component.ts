@@ -63,9 +63,6 @@ export class AppComponent {
     private relabelLog(log: Array<Trace>, relabeler: Relabeler) {
         for (const t of log) {
             for (const e of t.events) {
-                if (e.name === AlphaOracleService.START_SYMBOL || e.name === AlphaOracleService.STOP_SYMBOL) {
-                    continue;
-                }
                 e.name = relabeler.getNewLabel(e.name);
             }
             relabeler.restartSequence();
@@ -74,6 +71,9 @@ export class AppComponent {
 
     private relabelNet(net: PetriNet, labelMapping: Map<string, string>) {
         for (const t of net.getTransitions()) {
+            if (t.label === AlphaOracleService.START_SYMBOL || t.label === AlphaOracleService.STOP_SYMBOL) {
+                continue;
+            }
             t.label = labelMapping.get(t.label!);
         }
     }
