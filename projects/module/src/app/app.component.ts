@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
 import {
     AlphaOracleService, DropFile, FD_LOG, FD_PETRI_NET,
-    IncrementingCounter, PetriNet, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
+    IncrementingCounter, Lifecycle, PetriNet, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 
@@ -63,6 +63,9 @@ export class AppComponent {
     private relabelLog(log: Array<Trace>, relabeler: Relabeler) {
         for (const t of log) {
             for (const e of t.events) {
+                if (e.lifecycle !== undefined && e.lifecycle !== Lifecycle.COMPLETE) {
+                    continue;
+                }
                 e.name = relabeler.getNewLabel(e.name);
             }
             relabeler.restartSequence();
