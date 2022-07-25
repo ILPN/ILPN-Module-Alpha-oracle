@@ -52,7 +52,9 @@ export class AppComponent {
         }).subscribe(pos => {
             const counter = new IncrementingCounter();
             this.result = pos.map(pn => {
-                this.relabelNet(pn, relabeler.getLabelMapping());
+                if (this.fcDistinguishSameEvents.value) {
+                    this.relabelNet(pn, relabeler.getLabelMapping());
+                }
                 return new DropFile(`po${counter.next()}`, this._PetriNetSerializer.serialise(pn));
             });
         });
