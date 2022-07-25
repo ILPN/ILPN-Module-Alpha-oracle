@@ -51,11 +51,11 @@ export class AppComponent {
             lookAheadDistance: this.fcParallelismDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcParallelismDistance.value)
         }).subscribe(pos => {
             const counter = new IncrementingCounter();
-            this.result = pos.map(pn => {
+            this.result = pos.sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0)).map(pn => {
                 if (this.fcDistinguishSameEvents.value) {
                     this.relabelNet(pn, relabeler.getLabelMapping());
                 }
-                return new DropFile(`po${counter.next()}`, this._PetriNetSerializer.serialise(pn));
+                return new DropFile(`po${counter.next()}.pn`, this._PetriNetSerializer.serialise(pn));
             });
         });
     }
