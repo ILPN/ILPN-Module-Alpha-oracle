@@ -15,11 +15,9 @@
                 </mat-select>
             </mat-form-field>
             <mat-slide-toggle [formControl]="fcDistinguishSameEvents" fxFlexAlign="center" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
-            <mat-slide-toggle [formControl]="fcMergeSamePrefix" fxFlexAlign="center" class="slider"><span class="font">merge prefixes</span></mat-slide-toggle>
-            <mat-slide-toggle [formControl]="fcAddStartStopEvent" fxFlexAlign="center" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
         </div>
 
-        <ilpn-file-download [fileDisplay]="FD_PN" [disabled]="result === undefined" [files]="result" descriptionText="Click to download partial orders"></ilpn-file-download>
+        <ilpn-file-download [fileDisplay]="FD_CONCURRENCY" [disabled]="result === undefined" [files]="result" descriptionText="Click to download concurrency information"></ilpn-file-download>
     </div>
 
 </ilpn-page-layout>

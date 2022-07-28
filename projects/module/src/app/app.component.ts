@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
 import {
-    AlphaOracleService, DropFile, FD_LOG, FD_PETRI_NET,
-    IncrementingCounter, Lifecycle, PetriNet, PetriNetSerialisationService, Relabeler, Trace, XesLogParserService
+    AlphaOracleService, ConcurrencySerialisationService, DropFile,
+    FD_CONCURRENCY, FD_LOG, XesLogParserService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 
@@ -18,21 +18,17 @@ import {FormControl} from '@angular/forms';
 export class AppComponent {
 
     public FD_LOG = FD_LOG;
-    public FD_PN = FD_PETRI_NET;
+    public FD_CONCURRENCY = FD_CONCURRENCY;
 
     public fcParallelismDistance: FormControl;
     public fcDistinguishSameEvents: FormControl;
-    public fcAddStartStopEvent: FormControl;
-    public fcMergeSamePrefix: FormControl;
 
-    public result: Array<DropFile> | undefined = undefined;
+    public result: DropFile | undefined = undefined;
     public processing = false;
 
-    constructor(private _xesParser: XesLogParserService, private _alphaOracle: AlphaOracleService, private _PetriNetSerializer: PetriNetSerialisationService) {
+    constructor(private _xesParser: XesLogParserService, private _alphaOracle: AlphaOracleService, private _ConcurrencySerializer: ConcurrencySerialisationService) {
         this.fcParallelismDistance = new FormControl('1');
         this.fcDistinguishSameEvents = new FormControl(false);
-        this.fcAddStartStopEvent = new FormControl(false);
-        this.fcMergeSamePrefix = new FormControl(false);
     }
 
     processFileUpload(files: Array<DropFile>) {
@@ -40,45 +36,13 @@ export class AppComponent {
         this.processing = true;
         const log = this._xesParser.parse(files[0].content);
 
-        const relabeler = new Relabeler();
-        if (this.fcDistinguishSameEvents.value) {
-            this.relabelLog(log, relabeler);
-        }
-
-        this._alphaOracle.determineConcurrency(log, {
-            addStartStopEvent: this.fcAddStartStopEvent.value,
-            discardPrefixes: this.fcMergeSamePrefix.value,
-            lookAheadDistance: this.fcParallelismDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcParallelismDistance.value)
-        }).subscribe(pos => {
-            const counter = new IncrementingCounter();
-            this.result = pos.sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0)).map(pn => {
-                if (this.fcDistinguishSameEvents.value) {
-                    this.relabelNet(pn, relabeler.getLabelMapping());
-                }
-                return new DropFile(`po${counter.next()}.pn`, this._PetriNetSerializer.serialise(pn));
-            });
+        const concurrency = this._alphaOracle.determineConcurrency(log, {
+            lookAheadDistance: this.fcParallelismDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcParallelismDistance.value),
+            distinguishSameLabels: this.fcDistinguishSameEvents.value
         });
-    }
 
-    private relabelLog(log: Array<Trace>, relabeler: Relabeler) {
-        for (const t of log) {
-            for (const e of t.events) {
-                if (e.lifecycle !== undefined && e.lifecycle !== Lifecycle.COMPLETE) {
-                    continue;
-                }
-                e.name = relabeler.getNewLabel(e.name);
-            }
-            relabeler.restartSequence();
-        }
-    }
-
-    private relabelNet(net: PetriNet, labelMapping: Map<string, string>) {
-        for (const t of net.getTransitions()) {
-            if (t.label === AlphaOracleService.START_SYMBOL || t.label === AlphaOracleService.STOP_SYMBOL) {
-                continue;
-            }
-            t.label = labelMapping.get(t.label!);
-        }
+        this.result = new DropFile('concurrency.con', this._ConcurrencySerializer.serialise(concurrency));
+        this.processing = false;
     }
 
 }
